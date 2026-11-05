@@ -365,6 +365,33 @@ textarea {
   color: #8f8b7c;
 }
 
+.prompt-textarea[aria-invalid='true'] {
+  border-color: var(--danger);
+}
+
+.prompt-meta {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  font-size: 0.85rem;
+}
+
+.prompt-error {
+  color: var(--danger);
+  font-weight: 700;
+}
+
+.prompt-counter {
+  color: #6b6757;
+  font-variant-numeric: tabular-nums;
+}
+
+.prompt-counter.is-over {
+  color: var(--danger);
+  font-weight: 700;
+}
+
 .prompt-examples {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

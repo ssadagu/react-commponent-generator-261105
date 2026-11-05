@@ -48,6 +48,16 @@ describe('PromptInput', () => {
     expect(screen.getByRole('button', { name: '컴포넌트 생성' })).toBeDisabled();
   });
 
+  it('히스토리가 있으면 최근 프롬프트로 보여주고, 클릭하면 입력창에 채운다', async () => {
+    const user = userEvent.setup();
+    render(
+      <PromptInput onGenerate={vi.fn()} isLoading={false} history={['지난 프롬프트']} />,
+    );
+
+    await user.click(screen.getByRole('button', { name: '지난 프롬프트' }));
+    expect(screen.getByRole('textbox')).toHaveValue('지난 프롬프트');
+  });
+
   it('500자 초과 상태에서 Ctrl+Enter로도 제출되지 않는다', () => {
     const onGenerate = vi.fn();
     render(<PromptInput onGenerate={onGenerate} isLoading={false} />);

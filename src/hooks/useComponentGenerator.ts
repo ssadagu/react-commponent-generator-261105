@@ -1,5 +1,26 @@
 import { useState, useCallback } from 'react';
 import type { GeneratedComponent, Provider } from '../types';
+import { usePersistentState } from './usePersistentState';
+
+const STORAGE_KEY = 'rcg:components';
+
+function reviveComponents(raw: unknown): GeneratedComponent[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  return raw.flatMap((item): GeneratedComponent[] => {
+    if (
+      typeof item !== 'object' || item === null ||
+      typeof item.id !== 'string' ||
+      typeof item.prompt !== 'string' ||
+      typeof item.code !== 'string' ||
+      typeof item.createdAt !== 'string'
+    ) {
+      return [];
+    }
+    const createdAt = new Date(item.createdAt);
+    if (Number.isNaN(createdAt.getTime())) return [];
+    return [{ id: item.id, prompt: item.prompt, code: item.code, createdAt }];
+  });
+}
 
 interface UseComponentGeneratorReturn {
   components: GeneratedComponent[];
@@ -11,7 +32,7 @@ interface UseComponentGeneratorReturn {
 }
 
 export function useComponentGenerator(): UseComponentGeneratorReturn {
-  const [components, setComponents] = useState<GeneratedComponent[]>([]);
+  const [components, setComponents] = usePersistentState<GeneratedComponent[]>(STORAGE_KEY, [], reviveComponents);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,15 +67,15 @@ export function useComponentGenerator(): UseComponentGeneratorReturn {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [setComponents]);
 
   const removeComponent = useCallback((id: string) => {
     setComponents((prev) => prev.filter((c) => c.id !== id));
-  }, []);
+  }, [setComponents]);
 
   const clearAll = useCallback(() => {
     setComponents([]);
-  }, []);
+  }, [setComponents]);
 
   return { components, isLoading, error, generate, removeComponent, clearAll };
 }

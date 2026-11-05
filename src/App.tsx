@@ -3,6 +3,8 @@ import { PromptInput } from './components/PromptInput';
 import { WinTitle } from './components/WinTitle';
 import { ComponentCard } from './components/ComponentCard';
 import { useComponentGenerator } from './hooks/useComponentGenerator';
+import { usePersistentState } from './hooks/usePersistentState';
+import { addToHistory } from './utils/promptHistory';
 import type { Provider } from './types';
 import './App.css';
 
@@ -11,10 +13,20 @@ const PROVIDER_CONFIG = {
   google: { label: 'Google', placeholder: 'AIza...' },
 } as const;
 
+const reviveProvider = (raw: unknown): Provider | undefined =>
+  typeof raw === 'string' && raw in PROVIDER_CONFIG ? (raw as Provider) : undefined;
+
+const reviveHistory = (raw: unknown): string[] | undefined =>
+  Array.isArray(raw) ? raw.filter((p): p is string => typeof p === 'string') : undefined;
+
+const reviveString = (raw: unknown): string | undefined =>
+  typeof raw === 'string' ? raw : undefined;
+
 function App() {
-  const [apiKey, setApiKey] = useState('');
+  const [apiKey, setApiKey] = usePersistentState('rcg:apiKey', '', reviveString);
   const [showKey, setShowKey] = useState(false);
-  const [provider, setProvider] = useState<Provider>('google');
+  const [provider, setProvider] = usePersistentState<Provider>('rcg:provider', 'google', reviveProvider);
+  const [history, setHistory] = usePersistentState<string[]>('rcg:promptHistory', [], reviveHistory);
   const [envKeys, setEnvKeys] = useState<Record<Provider, boolean>>({
     anthropic: false,
     google: false,
@@ -36,6 +48,7 @@ function App() {
       alert(`${PROVIDER_CONFIG[provider].label} API 키를 입력하거나 .env에 설정해주세요.`);
       return;
     }
+    setHistory((prev) => addToHistory(prev, prompt));
     generate(prompt, apiKey || undefined, provider);
   };
 
@@ -73,7 +86,7 @@ function App() {
         <section className="win composer-panel" aria-label="컴포넌트 생성">
           <WinTitle title="새 컴포넌트" />
           <div className="win-body">
-            <PromptInput onGenerate={handleGenerate} isLoading={isLoading} />
+            <PromptInput onGenerate={handleGenerate} isLoading={isLoading} history={history} />
           </div>
         </section>
 

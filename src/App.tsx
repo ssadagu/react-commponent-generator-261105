@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { PromptInput } from './components/PromptInput';
+import { WinTitle } from './components/WinTitle';
 import { ComponentCard } from './components/ComponentCard';
 import { useComponentGenerator } from './hooks/useComponentGenerator';
 import type { Provider } from './types';
@@ -47,35 +48,38 @@ function App() {
 
   return (
     <div className="app">
-      <header className="app-header">
-        <div className="brand-mark">RC</div>
-        <div className="header-copy">
-          <span className="eyebrow">React Component Generator</span>
-          <h1>프롬프트로 만드는 UI 워크벤치</h1>
-          <p>요청을 입력하고, 생성된 React 컴포넌트를 바로 미리보고 코드로 확인합니다.</p>
-        </div>
-        <div className="header-meta" aria-label="현재 작업 상태">
-          <div>
-            <span>Provider</span>
-            <strong>{activeProvider}</strong>
+      <header className="win app-header">
+        <WinTitle title="React 컴포넌트 생성기" />
+        <div className="win-body app-header-body">
+          <div className="brand-mark" aria-hidden="true">RC</div>
+          <div className="header-copy">
+            <h1>프롬프트로 만드는 UI 워크벤치</h1>
+            <p>요청을 입력하면 React 컴포넌트를 만들어 바로 미리보고, 코드까지 확인할 수 있어요.</p>
           </div>
-          <div>
-            <span>Components</span>
-            <strong>{components.length}</strong>
-          </div>
+          <dl className="header-meta" aria-label="현재 작업 상태">
+            <div>
+              <dt>Provider</dt>
+              <dd>{activeProvider}</dd>
+            </div>
+            <div>
+              <dt>컴포넌트</dt>
+              <dd>{components.length}</dd>
+            </div>
+          </dl>
         </div>
       </header>
 
       <main className="workspace">
-        <section className="composer-panel" aria-label="컴포넌트 생성">
-          <PromptInput onGenerate={handleGenerate} isLoading={isLoading} />
+        <section className="win composer-panel" aria-label="컴포넌트 생성">
+          <WinTitle title="새 컴포넌트" />
+          <div className="win-body">
+            <PromptInput onGenerate={handleGenerate} isLoading={isLoading} />
+          </div>
         </section>
 
-        <aside className="settings-panel" aria-label="실행 설정">
-          <div className="settings-header">
-            <span className="panel-kicker">Runtime</span>
-            <h2>실행 설정</h2>
-          </div>
+        <aside className="win settings-panel" aria-label="실행 설정">
+          <WinTitle title="실행 설정" />
+          <div className="win-body">
           <div className="provider-select">
             <label htmlFor="provider">Provider</label>
             <select
@@ -118,11 +122,13 @@ function App() {
               {hasEnvKey ? '.env 키가 연결되어 있습니다.' : '직접 입력하거나 서버 환경변수를 설정하세요.'}
             </p>
           </div>
+          </div>
         </aside>
       </main>
 
       {error && (
-        <div className="error-banner">
+        <div className="error-banner" role="alert">
+          <span className="error-icon" aria-hidden="true">!</span>
           <p>{error}</p>
         </div>
       )}
@@ -130,10 +136,7 @@ function App() {
       <section className="results-section">
         {components.length > 0 && (
           <div className="results-header">
-            <div>
-              <span className="panel-kicker">Generated</span>
-              <h2>생성된 컴포넌트</h2>
-            </div>
+            <h2>생성된 컴포넌트</h2>
             <button className="btn-clear" onClick={clearAll}>
               전체 삭제
             </button>
@@ -141,7 +144,7 @@ function App() {
         )}
 
         {components.length === 0 && !isLoading && (
-          <div className="empty-state">
+          <div className="win empty-state">
             <div className="empty-preview" aria-hidden="true">
               <div className="empty-window">
                 <span />
@@ -156,14 +159,15 @@ function App() {
             </div>
             <div className="empty-copy">
               <h2>새 컴포넌트를 생성해보세요.</h2>
+              <p>위 입력창에 만들고 싶은 UI를 적고 Ctrl/⌘ + Enter를 누르세요.</p>
             </div>
           </div>
         )}
 
         {isLoading && (
-          <div className="loading-card">
-            <div className="loading-pulse" />
+          <div className="win loading-card" role="status">
             <p>컴포넌트를 생성하고 있습니다...</p>
+            <div className="loading-bar" aria-hidden="true"><span /></div>
           </div>
         )}
 

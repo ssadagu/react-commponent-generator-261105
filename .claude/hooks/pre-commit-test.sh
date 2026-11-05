@@ -22,4 +22,7 @@ if [ $status -ne 0 ]; then
   exit 2
 fi
 
+# 통과 시 사용자 화면에 요약 한 줄 표시 (vitest의 "Tests  40 passed (40)" 줄)
+summary=$(echo "$output" | grep -E '^[[:space:]]*Tests[[:space:]]' | sed -E 's/^[[:space:]]+//' | head -n 1)
+jq -n --arg msg "✅ 커밋 전 테스트 통과: ${summary:-bun run test}" '{systemMessage: $msg}'
 exit 0
